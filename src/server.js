@@ -1,28 +1,21 @@
 const express = require('express')
-const {engine} = require('express-handlebars')
+const path = require('path');
 const app = express()
 const http = require('http')
 const server = http.createServer(app)
 const port = process.env.PORT || 8080
-const {Server} = require('socket.io')
-const io = new Server(server)
-
+const newIoServer = require('./services/socket');
+const viewPath = path.resolve(__dirname, '../views/pages')
 
 app.use(express.static(__dirname + '/src/public'))
-app.set('views', './views')
-app.set('view engine', 'hbs')
-app.engine('hbs', engine({
-    layoutsDir: __dirname + '/views/layouts',
-    partialsDir: __dirname + '/views/partials',
-    defaultLayout: 'index',
-    extname: 'hbs'
-}))
+app.set('views', viewPath)
+app.set('view engine', 'ejs')
 
 
-app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+app.use(express.json())
 
-
+newIoServer(server)
 
 
 app.get('/', async (req, res) => {
